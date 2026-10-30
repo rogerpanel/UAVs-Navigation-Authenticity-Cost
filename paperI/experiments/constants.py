@@ -1,6 +1,6 @@
 """Paper I constants, each with an explicit provenance tag.
 
-Provenance tags (same discipline as the parent artifact):
+Provenance tags (one tag per input):
   measured        -- computed in this repository from a real capture
   derived         -- arithmetic on measured quantities
   literature      -- copied from a cited, peer-reviewed or standard source
@@ -8,7 +8,7 @@ Provenance tags (same discipline as the parent artifact):
   assumption      -- a modelling choice we make and state; swept where it matters
 
 Nothing in this file is fitted to make a result come out; every value is
-either read from the parent artifact or from the cited source.
+either read from the shared results/ directory or from the cited source.
 """
 from __future__ import annotations
 
@@ -17,12 +17,12 @@ from dataclasses import dataclass
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
-PARENT_RES = REPO / "results"
+SHARED_RES = REPO / "results"
 OUT = REPO / "paperI" / "results"
 OUT.mkdir(parents=True, exist_ok=True)
 
 # --------------------------------------------------------------------------
-# Parent certificate (paper D, "From Wire to Flight")
+# Delay certificate (Section II-A of the paper)
 # --------------------------------------------------------------------------
 H = 2                 # attacker-controlled hops, grid topology   [measured]
 S_SLACK = 5.0         # contact-window slack, s                   [measured]
@@ -45,7 +45,7 @@ GAMMA_JAM_EKF_SECANT = 0.5185
 
 
 def delta_theta(theta: float, h: int = H, s: float = S_SLACK) -> float:
-    """Lemma 1 of the parent: worst undetected cumulative delay."""
+    """Residual-delay lemma: worst undetected cumulative delay."""
     return h * min(theta, s)
 
 
@@ -57,7 +57,7 @@ def delta_theta(theta: float, h: int = H, s: float = S_SLACK) -> float:
 # CAVEAT (independent review): that flight's receiver keeps fix_type=3 with
 # 12-14 satellites throughout the post-onset window, so the proxy is a
 # degraded-but-honest fused estimator, NOT dead reckoning after rejection.
-# Runbook experiments E1/E3 measure the latter; swap it in here when present.
+# The GNSS-outage experiment (e1_inertial_gamma.py) and a SITL sweep measure the latter; swap it in here when present.
 # --------------------------------------------------------------------------
 @dataclass(frozen=True)
 class GammaScenario:
@@ -73,10 +73,10 @@ class GammaScenario:
 
 
 # --------------------------------------------------------------------------
-# Measured overrides (runbook ground rule 2)
+# Measured overrides: a measured value replaces a literature one only when its file exists
 #
 # A measured value never silently replaces a literature value or a proxy. Each
-# override below is read from a runbook result file only when that file
+# override below is read from a measured result file only when that file
 # exists; otherwise the original value stands. Every decision, either way, is
 # recorded in results/provenance_paperI.csv by write_provenance().
 # --------------------------------------------------------------------------
@@ -214,7 +214,7 @@ TESLA_KEY_BYTES = 16
 # --------------------------------------------------------------------------
 def hcrl_benign_rates() -> list[float]:
     import csv
-    p = PARENT_RES / "hcrl_type_signatures.csv"
+    p = SHARED_RES / "hcrl_type_signatures.csv"
     with p.open() as fh:
         return [float(r["normal_rate_fps"]) for r in csv.DictReader(fh)]
 
@@ -271,7 +271,7 @@ TAU_FRESH_OSNMA_MAX = 165.0  # receiver-guideline upper value              [lite
 
 
 def write_provenance() -> None:
-    """Record which value each runbook-overridable constant used, and why."""
+    """Record which value each overridable constant used, and why."""
     import csv
     p = OUT / "provenance_paperI.csv"
     with p.open("w", newline="") as fh:

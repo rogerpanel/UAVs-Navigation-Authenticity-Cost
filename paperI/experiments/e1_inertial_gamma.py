@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """E1 -- inertial (dead-reckoning) gamma from real flight logs (RQ1).
 
-Runbook section E1. The authenticated rate gamma_a currently comes from the
+GNSS-outage experiment. The authenticated rate gamma_a currently comes from the
 Whelan jamming flight, whose receiver never lost its fix (fix_type = 3 in all
 496 post-onset samples, 11-14 satellites): it measures a degraded but still
 fused estimator, not dead reckoning after GNSS is rejected. This script
@@ -16,7 +16,7 @@ measures the latter directly, by synthetic outage on the benign flight:
      subtract the EKF accelerometer bias at t0 if the log carries one;
   3. use the GNSS-aided EKF position as ground truth and record
         e(tau)       = || p_DR(tau) - p_EKF(tau) ||   (horizontal by default,
-                                                       matching the parent)
+                                                       matching the gamma campaign)
         gamma_d(tau) = (e(tau) - e(0)) / tau           (e(0) = 0 here);
   4. per tau bin (the same bins as results/gamma_campaign_bins.csv) report
      the supremum, p95 and median, plus a bootstrap interval for the
@@ -58,7 +58,7 @@ REPO = HERE.parents[1]
 
 G = 9.80665
 EDGE_S = 10.0
-# The parent campaign's staleness bins (results/gamma_campaign_bins.csv),
+# The gamma campaign's staleness bins (results/gamma_campaign_bins.csv),
 # truncated to the horizon this experiment integrates over.
 BINS = [(0.4, 1.0), (1.0, 2.0), (2.0, 5.0), (5.0, 10.0), (10.0, 20.0)]
 N_BOOT = 1000
@@ -199,7 +199,7 @@ def main() -> int:
     missing = [k for k in REQUIRED if k not in topics]
     if missing:
         print(f"[E1] SKIPPED: benign flight lacks {', '.join(missing)} "
-              f"(found: {', '.join(sorted(topics)) or 'none'}). The runbook's "
+              f"(found: {', '.join(sorted(topics)) or 'none'}). The experiment's "
               "fallback is ulog2csv on the original .ulg. Nothing written.")
         return 0
 
