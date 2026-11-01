@@ -12,7 +12,7 @@ have been removed and will be restored on acceptance.
 |---|---|
 | Language | Python 3.10 or newer |
 | Dependencies | `numpy` (`python3 -m pip install numpy`); TeX Live 2022+ to build the paper |
-| Run time | about 30 seconds on a laptop CPU, no download, no GPU |
+| Run time | about 30 seconds on a CPU |
 | Licence | MIT (`LICENSE`); third-party data remain under their own licences |
 
 ## 1. Quick check (about 30 seconds)
